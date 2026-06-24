@@ -17,7 +17,7 @@ function App() {
 
       // Save conversion to backend
       const response = await fetch(
-        "http://localhost:10000/api/payment-success",
+        "https://payment-flow-5zel.onrender.com/api/payment-success",
         {
           method: "POST",
           headers: {
