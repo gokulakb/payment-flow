@@ -1,55 +1,41 @@
 const express = require("express");
 const cors = require("cors");
-const db = require("./db");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-app.post("/api/payment-success", (req, res) => {
-
-  db.run(
-    `
-      INSERT INTO conversions
-      (amount,status)
-      VALUES (?,?)
-    `,
-    [100, "SUCCESS"]
-  );
-
-  res.json({
-    success: true
-  });
-
-});
-
-app.get("/api/metrics", (req, res) => {
-
-  db.all(
-    "SELECT * FROM conversions",
-    [],
-    (err, rows) => {
-
-      res.json({
-        applications_started: rows.length,
-        payments_completed: rows.length,
-        conversion_rate:
-          rows.length > 0
-            ? "100%"
-            : "0%",
-        records: rows
-      });
-
-    }
-  );
-
-});
+let conversions = [];
 
 app.get("/", (req, res) => {
   res.send("Payment Flow API Running");
 });
 
-app.listen(10000, () => {
-  console.log("Server running on 10000");
+app.post("/api/payment-success", (req, res) => {
+  conversions.push({
+    amount: 100,
+    status: "SUCCESS",
+    createdAt: new Date()
+  });
+
+  res.json({
+    success: true
+  });
+});
+
+app.get("/api/metrics", (req, res) => {
+  res.json({
+    applications_started: conversions.length,
+    payments_completed: conversions.length,
+    conversion_rate:
+      conversions.length > 0 ? "100%" : "0%",
+    records: conversions
+  });
+});
+
+const PORT = process.env.PORT || 10000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on ${PORT}`);
 });
